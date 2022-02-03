@@ -21,10 +21,7 @@ jobs:
       run: |
         ls -lah && pwd && cd .. && ls -lah
     - uses: actions/checkout@v1
-    - name: Make envfile
-      uses: SpicyPizza/create-envfile@v1
-      with:
-        envkey_REACT_APP_GOOGLE_MAP_KEY: ${{ secrets.REACT_APP_GOOGLE_MAP_KEY }}
+    
     - name: Yarn Install
       run: |
         yarn install
