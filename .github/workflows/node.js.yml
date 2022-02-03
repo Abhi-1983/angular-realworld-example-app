@@ -1,0 +1,54 @@
+name: Staging Build
+env:
+  DISTRIBUTION_ID: ESR1IX61DGMO9
+on:
+  push:
+    branches:
+      - master
+jobs: 
+  build:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [12.x]
+        
+    steps:
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: PWD
+      run: |
+        ls -lah && pwd && cd .. && ls -lah
+    - uses: actions/checkout@v1
+    - name: Make envfile
+      uses: SpicyPizza/create-envfile@v1
+      with:
+        envkey_REACT_APP_GOOGLE_MAP_KEY: ${{ secrets.REACT_APP_GOOGLE_MAP_KEY }}
+    - name: Yarn Install
+      run: |
+        yarn install
+    - name: DEV Build
+      run: |
+        yarn build
+      env:
+        CI: false
+    - name: Deploy to S3
+      uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --delete
+      env:
+        AWS_S3_BUCKET: trassociates.tk1
+        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        SOURCE_DIR: "build"
+        CI: ""
+    - name: Configure AWS Credebtials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id:  ${{ secrets.ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    - name: Add Invalidation to CloudFront Distribution
+      run: aws cloudfront create-invalidation --distribution-id ${{ env.DISTRIBUTION_ID }} --paths "/*"
