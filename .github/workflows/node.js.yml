@@ -39,7 +39,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-        SOURCE_DIR: "build"
+        SOURCE_DIR: "dist"
         CI: ""
     - name: Configure AWS Credebtials
       uses: aws-actions/configure-aws-credentials@v1
